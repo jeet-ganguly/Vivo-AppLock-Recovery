@@ -6,8 +6,7 @@
 ---
 ## POC Video
 
-<video src="./poc.mp4" controls width="100%"></video>
-
+![poc](poc.gif)
 ---
 
 ## Context & Goal
