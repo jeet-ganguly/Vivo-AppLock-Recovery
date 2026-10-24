@@ -1,6 +1,6 @@
 # Vivo-AppLock-Recovery — Vivo V2022 (Android 12)
 <div align="center">
-<img src="./theme.png" alt="theme Logo" height="700"/>
+<img src="./theme.png" alt="theme Logo" width="100%"/>
 </div>
 
 ## Context & Goal
