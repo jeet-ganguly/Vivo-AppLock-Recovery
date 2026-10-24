@@ -3,6 +3,13 @@
 <img src="./theme.png" alt="theme Logo" width="100%"/>
 </div>
 
+---
+## POC Video
+
+<video src="./poc.mp4" controls width="100%"></video>
+
+---
+
 ## Context & Goal
 
 This write-up covers recovering access to a Vivo V2022 running Android 12 (Funtouch OS / OriginOS), where the **App Lock** PIN protecting a specific app was forgotten, and the built-in recovery flow (security questions) was also unusable because those answers were forgotten too.
@@ -228,13 +235,12 @@ def check_correct(timeout=0.6, poll=0.3):
     return True             # treat as correct
 ```
 
-**Step-by-step logic:**
 1. `start = time.time()` records the moment checking begins.
 2. The `while keypad_visible():` loop keeps checking as long as the PIN screen is still the focused window.
 3. Each iteration, `time.time() - start` computes elapsed seconds since the check began.
 4. If that exceeds `timeout` (0.6s here), the function gives up and returns `False` — this guess is treated as wrong.
 5. If instead `keypad_visible()` becomes `False` on its own — meaning the window closed — the `while` loop exits naturally (without hitting the `return False` inside it), and the function falls through to `return True`.
-6. `poll` (0.1s) is the pause between successive checks, balancing responsiveness against spamming the device with queries.
+6. `poll` (0.3s) is the pause between successive checks, balancing responsiveness against spamming the device with queries.
 
 
 ---
@@ -292,13 +298,6 @@ if __name__ == "__main__":
             print(f"[{tried}/{total}] last tried: {pin}  (~{remaining/60:.1f} min remaining)")
     else:
         print("All 10,000 combinations, no match found.")
-```
-
-### Why `press_fast` batches taps into one `adb shell` call
-
-```python
-cmds = " && ".join(f"input tap {KEYS[ch][0]} {KEYS[ch][1]}" for ch in seq)
-subprocess.run(["adb", "shell", cmds], check=True)
 ```
 
 Rather than calling `subprocess.run()` four separate times (once per digit) — each of which spawns a new `adb` process and pays connection overhead — this builds a single shell command string chaining all four taps with `&&`, so they execute sequentially on the device within **one** ADB invocation. For a 4-digit PIN, this cuts 4 process-spawns down to 1 per attempt, which adds up meaningfully across thousands of attempts.
@@ -364,8 +363,6 @@ $$
  
 | Formula | What it counts | Applies here? |
 |---|---|---|
-| $\dbinom{n}{r} = \dfrac{n!}{r!\,(n-r)!}$ | Combinations: order doesn't matter, no repetition |  No — PIN digit order matters |
-| $P(n,r) = \dfrac{n!}{(n-r)!}$ | Permutations: order matters, no repetition |  No — the same chunk can repeat |
 | $n^r$ | Permutations **with repetition**: order matters, repetition allowed |  Yes — matches this scenario exactly |
  
 ### Step 5 — Comparing against full brute force
@@ -437,24 +434,18 @@ Each attempt requires at least two ADB round trips: one to send the taps, one to
 | `subprocess` per call, full unfiltered `dumpsys window` check | ~1.0-1.1s | ~2.8-3 hours |
 | Persistent connection via `adb-shell` library | May be give better result | :) |
 
-### Why a persistent connection matters more than language (C++,C,Rust etc.) choice
-
-A natural instinct when something feels slow is to rewrite it in a faster language (C++, Rust, etc.). In this case, that would **not** meaningfully help, because the bottleneck isn't CPU-bound script execution — it's the overhead of spawning a brand-new `adb` process and renegotiating a connection for every single command. That overhead (typically 50-200ms per `adb` invocation) exists regardless of which language issues the call, since it happens at the ADB protocol/process level, outside the script entirely.
-
-The actual fix is **connection reuse**: open one ADB connection and keep it alive for the whole run, issuing all 10,000+ commands over that same connection instead of spawning a new process each time.
-
 ---
 
 ## 7. Full Summary of the Recovery Process
 
-1. **Enabled ADB access**: Developer options, standard USB debugging, and the Vivo-specific "USB debugging (Security settings)" toggle (the latter being the actual fix for early "nothing happens" symptoms).
-2. **Identified the lock screen**: confirmed via `dumpsys window` and `dumpsys input_method` that the App Lock PIN prompt used a custom in-app keypad (`VivoMixKey`), not a system keyboard — meaning tap-based input, not text injection, was required.
-3. **Extracted exact button coordinates**: used `uiautomator dump` to get each digit button's screen bounds, then applied the midpoint formula to calculate reliable tap points.
-4. **Built a success-detection check**: polled `dumpsys window`'s focused-window info after each guess to detect when the PIN screen closed.
-5. **Confirmed the field auto-cleared on a wrong guess**, simplifying the automation loop (no explicit clear step needed).
-6. **Verified there was no lockout/wipe mechanism** on this specific App Lock feature before proceeding with automated brute force.
-7. **Ran the brute-force script** across all 10,000 possible 4-digit combinations, tapping each and checking for success.
-9. **Visually confirmed success** using `show_touches` and `pointer_location` during the run, and by observing the expected unlocked screen once the script reported the matching PIN.
+1. **Enabled ADB access**
+2. **Identified the lock screen**:
+3. **Extracted exact button coordinates**
+4. **Built a success-detection check**
+5. **Confirmed the field auto-cleared on a wrong guess**
+6. **Verified there was no lockout/wipe mechanism**
+7. **Ran the brute-force script**
+9. **Visually confirmed success**
 
 This recovered full access to the app and its data without resorting to a factory reset, which would have erased everything the recovery was meant to preserve.
 
