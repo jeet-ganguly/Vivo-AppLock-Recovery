@@ -9,7 +9,7 @@ This write-up covers recovering access to a Vivo V2022 running Android 12 (Funto
 
 The phone itself was unlocked and usable — this was not a full device lockout. Only the App Lock feature gating one app's access was the obstacle. The goal was to recover the PIN and the app's data **without triggering a factory reset or any data-destructive recovery path**, since a reset would destroy exactly the data being recovered.
 
-> If anyone have bad-usb he/she can try with this but during this, I did not have amy bad-usb.
+> If anyone have bad-usb he/she can try with this but during this work I did not have amy bad-usb.
 
 ---
 
