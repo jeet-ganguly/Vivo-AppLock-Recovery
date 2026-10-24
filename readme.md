@@ -17,24 +17,10 @@ The phone itself was unlocked and usable — this was not a full device lockout.
 
 ADB (Android Debug Bridge) is disabled by default on all Android devices as a security measure. It must be explicitly enabled via Developer options before any of the following steps work.
 
-### Step 1 — Enable Developer options
+    1. Enable Developer options
+    2. Enable USB debugging
 
-1. Open **Settings > About phone**.
-2. Scroll to find **Build number** (on some Vivo builds, labeled **Software version** instead).
-3. Tap it **7 times in rapid succession**. After a few taps, a countdown toast appears ("You are now 3 steps away from being a developer," etc.). On the final tap, a confirmation appears: *"You are now a developer!"*
-4. If prompted, enter the device's screen lock (PIN/pattern/password) to confirm — this is Android's safeguard to prevent enabling developer tools without physical device authentication.
-
-### Step 2 — Enable USB debugging
-
-1. Inside **Developer options**, toggle on **USB debugging**.
-2. A confirmation dialog appears warning about the security implications — accept it.
-3. Connect the device to your computer via a USB data cable (not a charge-only cable — some cheaper cables only carry power, not data; if `adb devices` shows nothing, try a different cable first before troubleshooting software).
-4. On the device screen, a prompt appears: **"Allow USB debugging?"** showing the host computer's RSA key fingerprint.
-5. Tap **"Always allow from this computer"** (checkbox) and then **OK**. This whitelists your computer's ADB key so future connections won't re-prompt.
-
-
-
-### Step 3 — Verify the connection from the computer
+### Verify the connection from the computer
 
 ```bash
 adb devices
