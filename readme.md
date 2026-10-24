@@ -1,6 +1,6 @@
 # Recovering a Forgotten Gallery App Lock PIN — Vivo V2022 (Android 12)
-<div>
-<img src="./theme.png" alt="theme Logo" height="500"/>
+<div align="center">
+<img src="./theme.png" alt="theme Logo" height="700"/>
 </div>
 
 ## Context & Goal
